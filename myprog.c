@@ -260,7 +260,7 @@ int FindLegalMoves(struct State *state)
 }
 
 // TODO: Optimize this method
-double evalBoard(State *currBoard)
+double evalBoard(struct State *currBoard)
 {
 	int y,x;
 	double score = 0.0;
@@ -294,11 +294,11 @@ double MaxVal(struct State *prevState, double alpha, double beta, int MaxDepth)
 		return evalBoard(prevState);
 	}
 
-	state.player = nextState->player==1?2:1;
+	state.player = prevState->player==1?2:1;
 	memcpy(state.board,prevState->board,64*sizeof(char));
 	FindLegalMoves(&state);
 	
-	for (x=0;x<state.numLegalMoves.x++)
+	for (x=0;x<state.numLegalMoves;x++)
 	{
 		struct State nextState;
 		double rval;
@@ -326,7 +326,7 @@ double MinVal(struct State *prevState, double alpha, double beta, int MaxDepth)
 		return evalBoard(prevState);
 	}
 
-	state.player = nextState->player==1?2:1;
+	state.player = prevState->player==1?2:1;
 	memcpy(state.board,prevState->board,64*sizeof(char));
 	FindLegalMoves(&state);
 
