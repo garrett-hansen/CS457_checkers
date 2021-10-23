@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
 
     /* Convert command line parameters */
     SecPerMove = (float) atof(argv[1]); /* Time allotted for each move */
-    MaxDepth = (argc == 4) ? atoi(argv[3]) : -1;
+    MaxDepth = (argc == 3) ? atoi(argv[2]) : -1;
 
 fprintf(stderr, "%s SecPerMove == %lg\n", argv[0], SecPerMove);
 
