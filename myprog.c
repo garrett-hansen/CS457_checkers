@@ -259,12 +259,100 @@ int FindLegalMoves(struct State *state)
     return (jumpptr+numLegalMoves);
 }
 
+// TODO: Optimize this method
+double evalBoard(State *currBoard)
+{
+	int y,x;
+	double score = 0.0;
+
+	for(y=0;y<8;y++) for (x=0; x<8; x++) if (x%2 != y%2)
+	{
+		if (king(currBoard->board[y][x]))
+		{
+			//if(color(currBoard->board[y][x]) == White) score += 2.0;
+			if(currBoard->board[y][x] & White) score += 2.0;
+			else score -= 2.0;
+		}
+		else if (piece(currBoard->board[y][x]))
+		{
+			if(currBoard->board[y][x] & White) score += 1.0;
+			else score -= 1.0;
+		}
+	}
+	score = me==1 ? -score : score;
+
+	return score;
+}
+
+double MaxVal(struct State *prevState, double alpha, double beta, int MaxDepth)
+{
+	struct State state;
+	int x;
+
+	if (MaxDepth <= 0)
+	{
+		return evalBoard(prevState);
+	}
+
+	state.player = nextState->player==1?2:1;
+	memcpy(state.board,prevState->board,64*sizeof(char));
+	FindLegalMoves(&state);
+	
+	for (x=0;x<state.numLegalMoves.x++)
+	{
+		struct State nextState;
+		double rval;
+		nextState.player=state.player;
+		memcpy(nextState.board,state.board,64*sizeof(char));
+		PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
+		rval = MinVal(&nextState,alpha,beta,MaxDepth-1);
+		if (rval > alpha)
+		{
+			alpha = rval;
+			if (alpha >= beta) return beta;
+		}
+	}
+	return alpha;
+}
+
+
+double MinVal(struct State *prevState, double alpha, double beta, int MaxDepth)
+{
+	struct State state;
+	int x;
+
+	if (MaxDepth <= 0)
+	{
+		return evalBoard(prevState);
+	}
+
+	state.player = nextState->player==1?2:1;
+	memcpy(state.board,prevState->board,64*sizeof(char));
+	FindLegalMoves(&state);
+
+	for (x=0;x<state.numLegalMoves;x++)
+	{
+		struct State nextState;
+		double rval;
+		nextState.player=state.player;
+		memcpy(nextState.board,state.board,64*sizeof(char));
+		PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
+		rval = MaxVal(&nextState,alpha,beta,MaxDepth-1);
+		if (rval < beta)
+		{
+			beta = rval;
+			if (beta <= alpha) return alpha;
+		}
+	}
+	return beta;
+}
+
 /* Employ your favorite search to find the best move here.  */
 /* This example code shows you how to call the FindLegalMoves function */
 /* and the PerformMove function */
 void FindBestMove(int player)
 {
-    int i; 
+    int i, x; 
     struct State state; 
 
     /* Set up the current state */
@@ -279,6 +367,25 @@ void FindBestMove(int player)
     // to be a random (legal) one, so that it plays a legal game of checkers.
     // You *will* want to replace this with a more intelligent move seleciton
     i = rand()%state.numLegalMoves;
+	double alpha = -1000000.0;
+	double beta = 1000000.0;
+
+	for (x=0;x<state.numLegalMoves;x++)
+	{
+		struct State nextState;
+		double rval;
+		nextState.player=player;
+		memcpy(nextState.board,board,64*sizeof(char));
+		PerformMove(nextState.board,state.movelist[x],MoveLength(state.movelist[x]));
+		rval = MinVal(&nextState,alpha,beta,MaxDepth);
+		if (rval > alpha)
+		{
+			alpha = rval;
+			i = x;
+		}
+		
+	}
+
     memcpy(bestmove,state.movelist[i],MoveLength(state.movelist[i]));
 }
 
